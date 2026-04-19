@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Home Dashboard | Chaitanya Sri</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+
+    /* === RESET === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* === VARIABLES === */
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --surface3: #1f242f;
+      --border: rgba(255,255,255,0.06);
+      --border2: rgba(255,255,255,0.12);
+      --text: #f0f2f5;
+      --muted: #7a8094;
+      --accent: #4df0b0;
+      --accent2: #4dc8f0;
+      --accent3: #f0b04d;
+      --red: #f05c4d;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+      --radius: 16px;
+      --radius-sm: 10px;
+    }
+
+    /* === BODY LAYOUT === */
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      grid-template-rows: auto 1fr;
+    }
+
+    /* === SIDEBAR === */
+    .sidebar {
+      grid-row: 1 / -1;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .logo {
+      font-family: var(--font-head);
+      font-size: 22px;
+      font-weight: 800;
+      padding: 0 24px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo span { color: var(--accent); }
+    .nav {
+      flex: 1;
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .nav-label {
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0 12px;
+      margin: 16px 0 8px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active {
+      background: rgba(77,240,176,0.1);
+      color: var(--accent);
+      border-color: rgba(77,240,176,0.2);
+    }
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+    .avatar { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .avatar-circle {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-head);
+      font-weight: 700; font-size: 13px; color: #0a0c10;
+    }
+    .avatar-name { font-size: 13px; }
+    .avatar-role { font-size: 11px; color: var(--muted); }
+
+    /* === TOPBAR === */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar h1 { font-family: var(--font-head); font-size: 20px; font-weight: 700; }
+    .topbar p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 0 2px rgba(77,240,176,0.3); }
+      50%      { box-shadow: 0 0 0 5px rgba(77,240,176,0.15); }
+    }
+
+    /* === BUTTONS === */
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .btn:hover { background: var(--surface3); }
+    .btn-accent {
+      background: var(--accent); color: #0a0c10;
+      border-color: var(--accent); font-weight: 500;
+    }
+    .btn-accent:hover { background: #3dd99d; }
+
+    /* === MAIN CONTENT === */
+    .main {
+      padding: 28px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* === STAT CARDS === */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+    .stat-card.green::before { background: var(--accent); }
+    .stat-card.blue::before  { background: var(--accent2); }
+    .stat-card.amber::before { background: var(--accent3); }
+    .stat-card.red::before   { background: var(--red); }
+    .stat-label {
+      font-size: 11px; color: var(--muted);
+      letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px;
+    }
+    .stat-value {
+      font-family: var(--font-head);
+      font-size: 28px; font-weight: 700; letter-spacing: -1px;
+    }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
+    .stat-sub.up { color: var(--accent); }
+    .stat-sub.down { color: var(--red); }
+
+    /* === CARD === */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: var(--border2); }
+    .card-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .card-title { font-family: var(--font-head); font-size: 15px; font-weight: 600; }
+    .card-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .badge {
+      font-size: 10px; padding: 3px 8px;
+      border-radius: 20px; border: 1px solid;
+    }
+    .badge-green { color: var(--accent); border-color: rgba(77,240,176,0.3); background: rgba(77,240,176,0.08); }
+    .badge-blue  { color: var(--accent2); border-color: rgba(77,200,240,0.3); background: rgba(77,200,240,0.08); }
+    .badge-amber { color: var(--accent3); border-color: rgba(240,176,77,0.3); background: rgba(240,176,77,0.08); }
+
+    /* === ROOMS === */
+    .rooms-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .room-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .room-card:hover { background: var(--surface3); transform: translateY(-1px); }
+    .room-card.selected { border-color: rgba(77,240,176,0.4); background: rgba(77,240,176,0.06); }
+    .room-name { font-family: var(--font-head); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .room-temp { font-family: var(--font-head); font-size: 22px; font-weight: 700; color: var(--accent); margin: 8px 0 4px; }
+    .room-meta { font-size: 11px; color: var(--muted); display: flex; gap: 10px; }
+
+    /* === DEVICES === */
+    .device-list { display: flex; flex-direction: column; gap: 12px; }
+    .device-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    .device-row.on { border-color: rgba(77,240,176,0.2); }
+    .device-info { display: flex; align-items: center; gap: 12px; }
+    .device-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; background: var(--surface3);
+    }
+    .device-row.on .device-icon { background: rgba(77,240,176,0.15); }
+    .device-name { font-size: 13px; font-weight: 500; }
+    .device-status { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+    /* === TOGGLE SWITCH === */
+    .toggle { position: relative; width: 40px; height: 22px; cursor: pointer; }
+    .toggle input { display: none; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--surface3);
+      border-radius: 11px;
+      border: 1px solid var(--border2);
+      transition: all 0.25s;
+    }
+    .toggle input:checked + .toggle-track {
+      background: rgba(77,240,176,0.25);
+      border-color: rgba(77,240,176,0.5);
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--muted); transition: all 0.25s;
+    }
+    .toggle input:checked ~ .toggle-thumb {
+      transform: translateX(18px);
+      background: var(--accent);
+    }
+
+    /* === BRIGHTNESS SLIDER === */
+    .brightness-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .brightness-row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .brightness-row input[type=range] {
+      flex: 1; height: 4px; -webkit-appearance: none;
+      background: var(--surface3); border-radius: 2px; outline: none;
+    }
+    .brightness-row input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 50%; background: var(--accent); cursor: pointer;
+    }
+    .brightness-val { font-size: 12px; font-weight: 500; color: var(--accent); min-width: 32px; }
+
+    /* === THERMOSTAT === */
+    .thermostat-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .ring-container { position: relative; width: 180px; height: 180px; }
+    .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: var(--surface3); stroke-width: 12; }
+    .ring-fill { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
+    .ring-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .ring-temp { font-family: var(--font-head); font-size: 36px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+    .ring-label { font-size: 11px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+    .thermo-controls { display: flex; align-items: center; gap: 20px; }
+    .thermo-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border2); background: var(--surface2);
+      color: var(--text); font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .thermo-btn:hover { background: var(--surface3); }
+    .thermo-modes { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .mode-btn {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1px solid var(--border); background: var(--surface2);
+      color: var(--muted); font-family: var(--font-mono); font-size: 11px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .mode-btn.active { background: rgba(77,240,176,0.1); border-color: rgba(77,240,176,0.4); color: var(--accent); }
+
+    /* === SCENES === */
+    .scenes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .scene-btn {
+      padding: 16px; border-radius: var(--radius-sm);
+      border: 1px solid var(--border); background: var(--surface2);
+      cursor: pointer; text-align: left; transition: all 0.2s;
+      font-family: var(--font-mono);
+    }
+    .scene-btn:hover { background: var(--surface3); transform: translateY(-1px); }
+    .scene-btn.active { border-color: rgba(77,240,176,0.4); background: rgba(77,240,176,0.07); }
+    .scene-emoji { font-size: 22px; margin-bottom: 8px; }
+    .scene-name { font-family: var(--font-head); font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .scene-desc { font-size: 11px; color: var(--muted); }
+
+    /* === ENERGY CHART === */
+    .energy-chart { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-top: 8px; }
+    .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.4s ease; cursor: pointer; }
+    .bar:hover { filter: brightness(1.2); }
+    .bar-label { font-size: 9px; color: var(--muted); }
+
+    /* === SECURITY === */
+    .security-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .cam-feed {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); aspect-ratio: 16/10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px; cursor: pointer; position: relative; transition: all 0.2s;
+    }
+    .cam-feed:hover { border-color: var(--border2); }
+    .cam-live {
+      position: absolute; top: 8px; left: 8px;
+      font-size: 9px; padding: 2px 6px; border-radius: 4px;
+      background: var(--red); color: #fff;
+    }
+    .cam-icon { font-size: 22px; }
+    .cam-name { font-size: 11px; color: var(--muted); }
+    .activity-list { display: flex; flex-direction: column; gap: 0; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+    .activity-text { font-size: 12px; line-height: 1.5; }
+    .activity-time { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+    /* === ANIMATIONS === */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .main > * { animation: fadeUp 0.35s ease both; }
+    .main > *:nth-child(1) { animation-delay: 0.05s; }
+    .main > *:nth-child(2) { animation-delay: 0.10s; }
+    .main > *:nth-child(3) { animation-delay: 0.15s; }
+    .main > *:nth-child(4) { animation-delay: 0.20s; }
+
+  </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">NEX<span>US</span></div>
+  <nav class="nav">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="setNav(this)"><span>⊞</span> Dashboard</div>
+    <div class="nav-item" onclick="setNav(this)"><span>◎</span> Rooms</div>
+    <div class="nav-item" onclick="setNav(this)"><span>⚡</span> Energy</div>
+    <div class="nav-label">Control</div>
+    <div class="nav-item" onclick="setNav(this)"><span>❄</span> Climate</div>
+    <div class="nav-item" onclick="setNav(this)"><span>🔒</span> Security</div>
+    <div class="nav-item" onclick="setNav(this)"><span>✦</span> Scenes</div>
+    <div class="nav-label">System</div>
+    <div class="nav-item" onclick="setNav(this)"><span>⊙</span> Automations</div>
+    <div class="nav-item" onclick="setNav(this)"><span>◈</span> Settings</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar">
+      <div class="avatar-circle">JD</div>
+      <div>
+        <div class="avatar-name">Jordan Dev</div>
+        <div class="avatar-role">Home Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div>
+    <h1>Good evening, Chaitanya Sri</h1>
+    <p id="clock">Loading...</p>
+  </div>
+  <div class="topbar-right">
+    <div class="status-dot"></div>
+    <span style="font-size:12px;color:var(--muted)">12 online</span>
+    <button class="btn">+ Add Device</button>
+    <button class="btn btn-accent">Away Mode</button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card green">
+      <div class="stat-label">Active Devices</div>
+      <div class="stat-value" style="color:var(--accent)">12</div>
+      <div class="stat-sub up">↑ 3 from this morning</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Avg Temperature</div>
+      <div class="stat-value" style="color:var(--accent2)">22°C</div>
+      <div class="stat-sub">Comfortable range</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Energy Usage</div>
+      <div class="stat-value" style="color:var(--accent3)">4.2 kW</div>
+      <div class="stat-sub down">↑ 12% vs yesterday</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Security</div>
+      <div class="stat-value" style="color:var(--accent)">Armed</div>
+      <div class="stat-sub up">3 sensors active</div>
+    </div>
+  </div>
+
+  <!-- ROOMS + DEVICES -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Rooms</div>
+          <div class="card-sub">Select to control</div>
+        </div>
+        <span class="badge badge-green">All Online</span>
+      </div>
+      <div class="rooms-grid">
+        <div class="room-card selected" onclick="selectRoom(this)">
+          <div class="room-name">Living Room</div>
+          <div class="room-temp">23°C</div>
+          <div class="room-meta"><span>4 devices</span><span>3 on</span></div>
+        </div>
+        <div class="room-card" onclick="selectRoom(this)">
+          <div class="room-name">Master Bedroom</div>
+          <div class="room-temp">21°C</div>
+          <div class="room-meta"><span>3 devices</span><span>1 on</span></div>
+        </div>
+        <div class="room-card" onclick="selectRoom(this)">
+          <div class="room-name">Kitchen</div>
+          <div class="room-temp">24°C</div>
+          <div class="room-meta"><span>5 devices</span><span>4 on</span></div>
+        </div>
+        <div class="room-card" onclick="selectRoom(this)">
+          <div class="room-name">Garage</div>
+          <div class="room-temp">18°C</div>
+          <div class="room-meta"><span>2 devices</span><span>0 on</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Living Room Devices</div>
+          <div class="card-sub">Tap to toggle</div>
+        </div>
+      </div>
+      <div class="device-list">
+        <div class="device-row on">
+          <div class="device-info">
+            <div class="device-icon">💡</div>
+            <div>
+              <div class="device-name">Main Lights</div>
+              <div class="device-status">On · 75% brightness</div>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked onchange="toggleDevice(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="device-row on">
+          <div class="device-info">
+            <div class="device-icon">📺</div>
+            <div>
+              <div class="device-name">Smart TV</div>
+              <div class="device-status">On · Netflix</div>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked onchange="toggleDevice(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="device-row">
+          <div class="device-info">
+            <div class="device-icon">❄</div>
+            <div>
+              <div class="device-name">AC Unit</div>
+              <div class="device-status">Off</div>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" onchange="toggleDevice(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="device-row on">
+          <div class="device-info">
+            <div class="device-icon">🔊</div>
+            <div>
+              <div class="device-name">Smart Speaker</div>
+              <div class="device-status">On · Playing music</div>
+            </div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" checked onchange="toggleDevice(this)">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="brightness-row">
+          <label>Brightness</label>
+          <input type="range" min="0" max="100" value="75" oninput="updateBrightness(this.value)">
+          <span class="brightness-val" id="bval">75%</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- THERMOSTAT + SCENES + ENERGY -->
+  <div style="display:grid;grid-template-columns:1fr 1.2fr 1.2fr;gap:20px">
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Thermostat</div>
+          <div class="card-sub">Living Room</div>
+        </div>
+        <span class="badge badge-blue">Heating</span>
+      </div>
+      <div class="thermostat-wrap">
+        <div class="ring-container">
+          <svg class="ring-svg" viewBox="0 0 180 180">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#4dc8f0"/>
+                <stop offset="100%" style="stop-color:#4df0b0"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg" cx="90" cy="90" r="74"/>
+            <circle class="ring-fill" id="ringFill" cx="90" cy="90" r="74"
+              stroke="url(#ringGrad)"
+              stroke-dasharray="465"
+              stroke-dashoffset="116"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-temp" id="thermoTemp">22°</div>
+            <div class="ring-label">Target</div>
+          </div>
+        </div>
+        <div class="thermo-controls">
+          <button class="thermo-btn" onclick="changTemp(-1)">−</button>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--muted)">Current</div>
+            <div style="font-family:var(--font-head);font-size:20px;font-weight:700">21°C</div>
+          </div>
+          <button class="thermo-btn" onclick="changTemp(1)">+</button>
+        </div>
+        <div class="thermo-modes">
+          <button class="mode-btn active" onclick="setMode(this)">Heat</button>
+          <button class="mode-btn" onclick="setMode(this)">Cool</button>
+          <button class="mode-btn" onclick="setMode(this)">Auto</button>
+          <button class="mode-btn" onclick="setMode(this)">Fan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Scenes</div>
+          <div class="card-sub">Quick presets</div>
+        </div>
+      </div>
+      <div class="scenes-grid">
+        <button class="scene-btn active" onclick="setScene(this)">
+          <div class="scene-emoji">🌅</div>
+          <div class="scene-name">Morning</div>
+          <div class="scene-desc">Warm & bright</div>
+        </button>
+        <button class="scene-btn" onclick="setScene(this)">
+          <div class="scene-emoji">🎬</div>
+          <div class="scene-name">Movie</div>
+          <div class="scene-desc">Dim & cool</div>
+        </button>
+        <button class="scene-btn" onclick="setScene(this)">
+          <div class="scene-emoji">🌙</div>
+          <div class="scene-name">Sleep</div>
+          <div class="scene-desc">Off & silent</div>
+        </button>
+        <button class="scene-btn" onclick="setScene(this)">
+          <div class="scene-emoji">🏠</div>
+          <div class="scene-name">Away</div>
+          <div class="scene-desc">Eco & secure</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Energy Today</div>
+          <div class="card-sub">Hourly usage (kW)</div>
+        </div>
+        <span class="badge badge-amber">4.2 kW</span>
+      </div>
+      <div class="energy-chart" id="energyChart"></div>
+      <div style="display:flex;gap:16px;margin-top:14px;font-size:11px;color:var(--muted)">
+        <span>⚡ Peak: 6.1 kW</span>
+        <span>💰 Est: $1.24</span>
+        <span>🌿 Saving: 18%</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECURITY -->
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Security Overview</div>
+        <div class="card-sub">3 cameras · all online</div>
+      </div>
+      <span class="badge badge-green">Armed</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px">
+      <div class="security-grid">
+        <div class="cam-feed">
+          <span class="cam-live">REC</span>
+          <div class="cam-icon">📷</div>
+          <div class="cam-name">Front Door</div>
+        </div>
+        <div class="cam-feed">
+          <span class="cam-live">REC</span>
+          <div class="cam-icon">📷</div>
+          <div class="cam-name">Backyard</div>
+        </div>
+        <div class="cam-feed">
+          <span class="cam-live">REC</span>
+          <div class="cam-icon">📷</div>
+          <div class="cam-name">Garage</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">Recent Activity</div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent)"></div>
+            <div>
+              <div class="activity-text">Motion detected — Front Door</div>
+              <div class="activity-time">2 min ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent2)"></div>
+            <div>
+              <div class="activity-text">Door unlocked — Main Entrance</div>
+              <div class="activity-time">18 min ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--accent3)"></div>
+            <div>
+              <div class="activity-text">Window sensor — Bedroom</div>
+              <div class="activity-time">1 hr ago</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--muted)"></div>
+            <div>
+              <div class="activity-text">System armed — Away mode</div>
+              <div class="activity-time">3 hr ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+<script>
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const date = now.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+    const time = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('clock').textContent = `${date} — ${time}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Sidebar nav
+  function setNav(el) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  // Room select
+  function selectRoom(el) {
+    document.querySelectorAll('.room-card').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  // Device toggle
+  function toggleDevice(input) {
+    const row = input.closest('.device-row');
+    row.classList.toggle('on', input.checked);
+    const status = row.querySelector('.device-status');
+    if (!input.checked) {
+      status.dataset.prev = status.textContent;
+      status.textContent = 'Off';
+    } else {
+      status.textContent = status.dataset.prev || 'On';
+    }
+  }
+
+  // Brightness slider
+  function updateBrightness(val) {
+    document.getElementById('bval').textContent = val + '%';
+  }
+
+  // Thermostat
+  let temp = 22;
+  function changTemp(delta) {
+    temp = Math.max(16, Math.min(30, temp + delta));
+    document.getElementById('thermoTemp').textContent = temp + '°';
+    const pct = (temp - 16) / (30 - 16);
+    const offset = 465 - pct * 465 * 0.75;
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+  }
+
+  // Mode buttons
+  function setMode(btn) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // Scene buttons
+  function setScene(btn) {
+    document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  // Energy bar chart
+  const hours = ['6a','7','8','9','10','11','12p','1','2','3','4','5','6','7','8'];
+  const usage = [1.2,1.8,2.1,2.4,3.0,3.6,4.1,3.8,3.4,3.2,3.8,4.2,4.5,4.2,3.9];
+  const maxU = Math.max(...usage);
+  const chart = document.getElementById('energyChart');
+
+  hours.forEach((h, i) => {
+    const pct = usage[i] / maxU;
+    const color = pct > 0.85 ? 'var(--red)' : pct > 0.65 ? 'var(--accent3)' : 'var(--accent)';
+    const wrap = document.createElement('div');
+    wrap.className = 'bar-wrap';
+    wrap.innerHTML = `
+      <div class="bar" style="height:${Math.round(pct*88)}px;background:${color};opacity:0.8"></div>
+      <div class="bar-label">${h}</div>
+    `;
+    chart.appendChild(wrap);
+  });
+</script>
+
+</body>
+</html>
